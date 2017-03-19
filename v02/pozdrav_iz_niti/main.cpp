@@ -11,8 +11,10 @@ void pozdrav() {
 }
 
 int main() {
+    // Inicijalizacija niti
     thread t(pozdrav);
 
+    // Čekanje da se nit završi
     t.join();
 
     return 0;

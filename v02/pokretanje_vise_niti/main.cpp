@@ -16,10 +16,15 @@ void f(int rbr) {
 const int BR_NITI = 10;
 
 int main() {
+    // Kreiranje niza niti
     thread t[BR_NITI];
+
+    // Inicijalizacija svh niti
     for (int i = 0; i < BR_NITI; i++) {
         t[i] = thread(f, i);
     }
+
+    // Čekanje da se sve niti izvrše
     for (int i = 0; i < BR_NITI; i++) {
         t[i].join();
     }

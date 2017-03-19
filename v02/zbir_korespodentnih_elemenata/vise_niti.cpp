@@ -10,9 +10,10 @@ using namespace std;
 // v - vektor B cije elemente treba sumirati
 // povratna vrednost - suma korespondentnih elemenata vektora A i B, izracunata pozivanjem dve niti
 vector<double> sumiraj(vector<double> a, vector<double> b) {
-
+    // Vektor parcijalnih suma
     vector<double> sum(a.size());
 
+    // Kreiranje iteratora
     ci a_begin = a.begin();
     ci a_middle = a.begin() + a.size() / 2;
     ci a_end = a.end();
@@ -21,9 +22,11 @@ vector<double> sumiraj(vector<double> a, vector<double> b) {
     vector<double>::iterator sum_begin = sum.begin();
     vector<double>::iterator sum_middle = sum.begin() + sum.size() / 2;
 
+    // Kreiranje niti
     thread t1(f, a_begin, a_middle, b_begin, sum_begin);
     thread t2(f, a_middle, a_end, b_middle, sum_middle);
 
+    // Čekanje da se niti završe
     t1.join();
     t2.join();
 
