@@ -15,6 +15,7 @@ class Parking {
     // Sledeća kapija sa koje treba pustiti
     int i;
     bool slobodan;
+
 public:
     Parking(Automobil& a) : automobil(a) {
         i = 0;

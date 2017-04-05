@@ -14,6 +14,7 @@ private:
     mutex m;
     condition_variable cvZapaljivo, cvObicno;
     int slobodno;
+
 public:
     Skladiste(Kamion& k) : kamion(k) {
         slobodno = 2;

@@ -15,6 +15,7 @@ private:
     mutex m;
     condition_variable cv;
     int slobodno;
+
 public:
     Prodavnica(Kupac& k, int n): kupac(k) {
         slobodno = n;

@@ -14,6 +14,7 @@ private:
     mutex m;
     condition_variable cv;
     int primeraka;
+
 public:
     Biblioteka(Primerak& pr, int br) : primerak(pr) {
         primeraka = br;

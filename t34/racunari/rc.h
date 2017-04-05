@@ -17,6 +17,7 @@ private:
     condition_variable cv;
     int slobodan[MAX];
     int racunara;
+
 public:
 	RC(Student& st, int br) : student(st) {
 	    racunara = MAX;

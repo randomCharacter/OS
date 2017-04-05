@@ -14,6 +14,7 @@ private:
     mutex m;
     condition_variable cvm, cvz;
     int mMesta, zMesta;
+
 public:
     Studentska_ambulanta(Student& st, int muskih, int zenskih) : student(st) {
         mMesta = muskih;

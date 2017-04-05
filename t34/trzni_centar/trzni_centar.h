@@ -17,6 +17,7 @@ private:
     condition_variable cv[2];
     int red[2];
     bool slobodan[2];
+
 public:
     Trzni_centar(Kupac& k) : kupac(k) {
         for (int i = 0; i < 2; i++) {

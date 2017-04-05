@@ -17,6 +17,7 @@ private:
     mutex m;
     condition_variable *cv;
     bool *slobodan;
+
 public:
     Teniski_klub(Mec& m, int ukupno_terena) : mec(m) {
         cv = new condition_variable[ukupno_terena];

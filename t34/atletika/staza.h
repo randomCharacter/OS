@@ -17,6 +17,7 @@ private:
     mutex m;
     condition_variable cv;
     bool slobodna;
+
 public:
     Atletska_staza(Takmicar& tak) : takmicar(tak) {
         slobodna = true;
