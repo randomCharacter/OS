@@ -15,15 +15,16 @@ private:
     Student& student;
     mutex m;
     condition_variable cv;
-    int slobodan[MAX];
-    int racunara;
+    bool slobodan[MAX];
+    int racunara, ukRacunara;
 
 public:
 	RC(Student& st, int br) : student(st) {
-	    racunara = MAX;
-        for (int i = 0; i < MAX; i++) {
+	    ukRacunara = br;
+	    racunara = ukRacunara;
+        for (int i = 0; i < ukRacunara; i++) {
             // Znači da je računar slobodan
-            slobodan[i] = -1;
+            slobodan[i] = true;
         }
     }
 
@@ -41,8 +42,17 @@ public:
             student.ceka(rbr);
             cv.wait(l);
         }
+        // Broj računara za koji student seda
+        int brRac;
+        for (int i = 0; i < ukRacunara; i++) {
+            if (slobodan[i]) {
+                brRac = i;
+                break;
+            }
+        }
+        racunara--;
+        slobodan[brRac] = false;
         // Kada se neki oslobodi
-        int brRac = MAX - racunara-- + 1;
         student.zauzeo(rbr, brRac);
         return brRac;
     }
@@ -55,7 +65,10 @@ public:
     // Potrebno je pozvati metodu student.oslobodio kada student oslobodi racunar.
     void oslobodi(int rbr, int id_racunara) {
         unique_lock<mutex> l(m);
+        // Oslobađa računar i obaveštava druge niti o tome
         student.oslobodio(rbr, id_racunara);
+        slobodan[id_racunara] = true;
+        racunara++;
         cv.notify_one();
     }
 };

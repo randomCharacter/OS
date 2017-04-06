@@ -14,10 +14,12 @@ private:
     mutex m;
     condition_variable cvZapaljivo, cvObicno;
     int slobodno;
+    int zapaljivih;
 
 public:
     Skladiste(Kamion& k) : kamion(k) {
         slobodno = 2;
+        zapaljivih = 0;
     }
 
     // Metoda koju poziva nit koja simulira kretanje kamiona kada on pokusava da istovari robu.
@@ -31,26 +33,15 @@ public:
     // Potrebno je pozvati metodu kamion.istovara kada zapocne istovar robe iz kamiona.
     // Potrebno je pozvati metodu kamion.odlazi kada je kamion zavrsio istovar i odlazi.
     void istovari(int rbr, int kolicina, bool zapaljivo) {
+        // Ulazi samo ako je količina robe manja od 7
         if (kolicina <= 7) {
-            /*if (zapaljivo) {
-                // Ako ne može proći
-                while (!slobodno) {
-                    kamion.ceka(rbr, kolicina, zapaljivo);
-                    cvZapaljivo.wait(l);
-                }
-            } else {
-                // Ako ne može proći
-                while (!slobodno) {
-                    kamion.ceka(rbr, kolicina, zapaljivo);
-
-                }
-            }*/
             {
                 unique_lock<mutex> l(m);
                 // Ako ne može proći
                 while (slobodno == 0) {
                     kamion.ceka(rbr, kolicina, zapaljivo);
                     if (zapaljivo) {
+                        zapaljivih++;
                         cvZapaljivo.wait(l);
                     } else {
                         cvObicno.wait(l);
@@ -65,10 +56,16 @@ public:
             // Kada završi
             kamion.odlazi(rbr);
             slobodno++;
+            // Ako je bio zapaljiv broj se smanjuje
+            if (zapaljivo) {
+                zapaljivih--;
+            }
             // Prvo se puštaju zapaljivi
-            cvZapaljivo.notify_one();
-            cvObicno.notify_one();
-
+            if (zapaljivih > 0) {
+                cvZapaljivo.notify_one();
+            } else {
+                cvObicno.notify_one();
+            }
         }
     }
 };

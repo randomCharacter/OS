@@ -15,12 +15,18 @@ class Atletska_staza {
 private:
     Takmicar& takmicar;
     mutex m;
-    condition_variable cv;
+    // cv[0] - skakači
+    // cv[1] - bacači
+    condition_variable cv[2];
+    int skakaca;
+    int bacaca;
     bool slobodna;
 
 public:
     Atletska_staza(Takmicar& tak) : takmicar(tak) {
         slobodna = true;
+        skakaca = 0;
+        bacaca = 0;
     }
 
     // Metoda koju poziva nit koja simulira skakaca kako bi takmicar obavio skok.
@@ -36,18 +42,21 @@ public:
         system_clock::time_point pocetak = system_clock::now();
         {
             unique_lock<mutex> l(m);
+            // Broj skakača se povećava
+            skakaca++;
 
             // Ukoliko je staza zauzeta
             while (!slobodna) {
                 // Skakač čeka
                 takmicar.skakac_ceka(rbr);
-                cv.wait(l);
+                cv[1].wait(l);
             }
             // Kada se oslobodi počinje sa skakanjem
             slobodna = false;
             takmicar.skakac_skace(rbr);
         }
         this_thread::sleep_for(chrono::seconds(1));
+        unique_lock<mutex> l(m);
         // Beleženje kraja
         system_clock::time_point kraj = system_clock::now();
         // Beleženje rezultata
@@ -57,7 +66,15 @@ public:
         takmicar.skakac_zavrsio(rbr, ret);
         // Staza se oslobađa i o tome se obaveštavaju druge niti
         slobodna = true;
-        cv.notify_one();
+        // Ako ima bacača obaveštaavaju se da je staza prazna
+        if (bacaca > 0) {
+            cv[0].notify_one();
+        // Inače se obaveštava sledeći skakač
+        } else {
+            cv[1].notify_one();
+        }
+        // Broj skakača se smanjuje
+        skakaca--;
 
         return ret;
     }
@@ -75,12 +92,14 @@ public:
         system_clock::time_point pocetak = system_clock::now();
         {
             unique_lock<mutex> l(m);
+            // Broj bacača se povećava
+            bacaca++;
 
             // Ukoliko je staza zauzeta
             while (!slobodna) {
                 // Bacač čeka
                 takmicar.bacac_ceka(rbr);
-                cv.wait(l);
+                cv[0].wait(l);
             }
             // Kada se oslobodi počinje sa skakanjem
             slobodna = false;
@@ -98,7 +117,15 @@ public:
         takmicar.bacac_zavrsio(rbr, ret);
         // Staza se oslobađa i o tome se obaveštavaju druge niti
         slobodna = true;
-        cv.notify_one();
+        // Ako ima skakača obaveštaavaju se da je staza prazna
+        if (skakaca > 0) {
+            cv[1].notify_one();
+        // Inače se obaveštava sledeći skakač
+        } else {
+            cv[0].notify_one();
+        }
+        // Broj bacača se smanjuje
+        bacaca--;
 
         return ret;
     }

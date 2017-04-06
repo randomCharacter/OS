@@ -16,11 +16,13 @@ private:
     mutex m;
     condition_variable cv;
     bool slobodan[2];
+    int ukupno[2];
 
 public:
     Posta(Klijent& kl) : klijent(kl) {
         for (int i = 0; i < 2; i++) {
             slobodan[i] = true;
+            ukupno[i] = 0;
         }
     }
 
@@ -54,8 +56,10 @@ public:
         }
         this_thread::sleep_for(seconds(svota));
         unique_lock<mutex> l(m);
+        // Ukupna svota za dati red se povećava
+        ukupno[r] += svota;
         // Izlaz iz reda
-        klijent.napusta(rbr, r, svota);
+        klijent.napusta(rbr, r, ukupno[r]);
         slobodan[r] = true;
         // Obaveštava drugu nit da ima slobodnih mesta
         cv.notify_one();
