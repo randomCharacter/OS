@@ -8,6 +8,7 @@
 #include "kupac.h"
 
 using namespace std;
+using namespace chrono;
 
 class Prodavnica {
 private:
@@ -30,25 +31,23 @@ public:
     // Potrebno je pozvati metodu kupac.proba_odecu kada kupac udje u kabinu da proba odecu.
     // Potrebno je pozvati metodu kupac.zavrsio kada je kupac zavrsio probu odece.
     povratna_vrednost kupi(int rbr) {
-        system_clock::time_point poceo = system_clock::now();
         unique_lock<mutex> l(m);
-        // Ako nema slobodnih
+        system_clock::time_point pocetak = system_clock::now();
+        povratna_vrednost ret;
         while (slobodno == 0) {
             kupac.ceka(rbr);
             cv.wait(l);
         }
-        // Ako ima slobodnih
         slobodno--;
         kupac.proba_odecu(rbr);
-        // Kad završi sa probanjem
+        ret.kupio = rand() % 2;
         system_clock::time_point zavrsio = system_clock::now();
+        ret.cekao_na_kabinu = zavrsio - pocetak;
+        kupac.zavrsio(rbr, ret);
         slobodno++;
-        povratna_vrednost pv;
-        pv.kupio = rand() % 2;
-        pv.cekao_na_kabinu = zavrsio - poceo;
-        kupac.zavrsio(rbr, pv);
+        cv.notify_one();
 
-        return pv;
+        return ret;
     }
 };
 

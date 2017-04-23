@@ -36,9 +36,11 @@ public:
         if (valuta == DINAR) {
             unique_lock<mutex> l(m);
             // Ukoliko nema dovoljno sredstava
-            while (dsaldo < svota) {
+            if (dsaldo < svota) {
                 kredit.ceka(rbr, svota, valuta);
-                // Čeka dok se slov ne ispuni
+            }
+            while (dsaldo < svota) {
+                // Čeka dok se uslov ne ispuni
                 cvd.wait(l);
             }
             // Kada se pojavi dovoljno sredstava
@@ -48,9 +50,11 @@ public:
         } else {
             unique_lock<mutex> l(m);
             // Ukoliko nema dovoljno sredstava
-            while (esaldo < svota) {
+            if (esaldo < svota) {
                 kredit.ceka(rbr, svota, valuta);
-                // Čeka dok se slov ne ispuni
+            }
+            while (esaldo < svota) {
+                // Čeka dok se uslov ne ispuni
                 cve.wait(l);
             }
             // Kada se pojavi dovoljno sredstava
@@ -73,14 +77,14 @@ public:
             dsaldo += svota;
             kredit.vratio(rbr, svota, dsaldo, valuta);
             // Obaveštava drugu nit da se stanje na računu promenilo
-            cvd.notify_one();
+            cvd.notify_all();
         } else {
             unique_lock<mutex> l(m);
             // Vraćanje sredstava
             esaldo += svota;
             kredit.vratio(rbr, svota, esaldo, valuta);
             // Obaveštava drugu nit da se stanje na računu promenilo
-            cve.notify_one();
+            cve.notify_all();
         }
     }
 };
