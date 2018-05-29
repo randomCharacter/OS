@@ -116,7 +116,7 @@ public:
         dijagnostika.proces_upisao(rbp, adresa, vrednost);
         // Ukoliko ima čitača na čekanju
         if (pristupi[rbr_reci]->ceka_citanje > 0) {
-            pristupi[rbr_reci]->cv_r.notify_one();
+            pristupi[rbr_reci]->cv_r.notify_all();
         } else {
             pristupi[rbr_reci]->cv_w.notify_one();
         }
